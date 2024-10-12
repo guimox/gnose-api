@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:latest
+    container_name: gnos_database_container
+    environment:
+      POSTGRES_DB: quotes_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - quotes_network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gnos_springboot_container
+    ports:
+      - "8000:8080"
+    depends_on:
+      - db
+    networks:
+      - quotes_network
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+
+volumes:
+  postgres_data:
+
+networks:
+  quotes_network:
+    driver: bridge

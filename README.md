@@ -1,2 +1,1 @@
-# gnos-api
-Gnos project
+# voyag

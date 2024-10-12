@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "gnos-api-http",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
