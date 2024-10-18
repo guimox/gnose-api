@@ -35,6 +35,9 @@ jobs:
 
       - name: Build the App
         run: mvn clean package --file pom.xml
+        env:
+          OPENAI_TOKEN: ${{ secrets.OPENAI_TOKEN }}
+          DATABASE_CONNECTION: ${{ secrets.SUPABASE_URL }}
 
       - name: Build Docker Image
         uses: docker/build-push-action@v4
