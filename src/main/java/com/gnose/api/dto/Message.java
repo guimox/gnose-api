@@ -1,4 +1,4 @@
-package com.gnos.api.dto;
+package com.gnose.api.dto;
 
 public class Message {
 

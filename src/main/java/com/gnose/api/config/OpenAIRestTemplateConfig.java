@@ -1,4 +1,4 @@
-package com.gnos.api.config;
+package com.gnose.api.config;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;

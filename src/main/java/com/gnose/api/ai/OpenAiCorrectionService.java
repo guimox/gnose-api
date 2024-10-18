@@ -1,7 +1,7 @@
-package com.gnos.api.ai;
+package com.gnose.api.ai;
 
-import com.gnos.api.dto.ChatRequest;
-import com.gnos.api.dto.ChatResponse;
+import com.gnose.api.dto.ChatRequest;
+import com.gnose.api.dto.ChatResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;

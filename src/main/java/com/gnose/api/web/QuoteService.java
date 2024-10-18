@@ -1,8 +1,8 @@
-package com.gnos.api.web;
+package com.gnose.api.web;
 
-import com.gnos.api.ai.OpenAiCorrectionService;
-import com.gnos.api.ai.OpenAiModerationService;
-import com.gnos.api.model.Quote;
+import com.gnose.api.ai.OpenAiCorrectionService;
+import com.gnose.api.ai.OpenAiModerationService;
+import com.gnose.api.model.Quote;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

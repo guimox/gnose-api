@@ -1,4 +1,4 @@
-package com.gnos.api.handler;
+package com.gnose.api.handler;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

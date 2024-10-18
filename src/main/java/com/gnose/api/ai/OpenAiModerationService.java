@@ -1,4 +1,4 @@
-package com.gnos.api.ai;
+package com.gnose.api.ai;
 
 import org.springframework.ai.moderation.*;
 import org.springframework.ai.openai.OpenAiModerationModel;

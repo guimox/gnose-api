@@ -1,4 +1,4 @@
-package com.gnos.api;
+package com.gnose.api;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
