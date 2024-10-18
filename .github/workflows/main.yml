@@ -42,7 +42,7 @@ jobs:
           context: .
           dockerfile: Dockerfile
           push: false
-          tags: ghcr.io/${{ github.repository }}/${{ secrets.PROJECT_NAME }}:v1.0.0
+          tags: ghcr.io/${{ github.repository }}/${{ secrets.DOCKER_CONTAINER_NAME }}:v1.0.0
 
       - name: Login to GitHub Container Registry
         run: |
@@ -54,7 +54,7 @@ jobs:
           context: .
           dockerfile: Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository }}/${{ secrets.PROJECT_NAME }}:v1.0.0
+          tags: ghcr.io/${{ github.repository }}/${{ secrets.DOCKER_CONTAINER_NAME }}:v1.0.0
 
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v0.1.6
@@ -68,11 +68,11 @@ jobs:
             echo "${{ secrets.PAT_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
             # Pull the Docker image
-            docker pull ghcr.io/${{ github.repository }}/rest-api:v1.0.0
+            docker pull ghcr.io/${{ github.repository }}/${{ secrets.DOCKER_CONTAINER_NAME }}:v1.0.0
 
             # Stop and remove the existing container
             docker stop ${{ secrets.DOCKER_CONTAINER_NAME }} || true
             docker rm ${{ secrets.DOCKER_CONTAINER_NAME }} || true
 
             # Run the new container
-            docker run -d --name "${{ secrets.DOCKER_CONTAINER_NAME }}" --restart unless-stopped -p 8080:8080 ghcr.io/${{ github.repository }}/rest-api:v1.0.0
+            docker run -d --name "${{ secrets.DOCKER_CONTAINER_NAME }}" --restart unless-stopped -p 8080:8080 ghcr.io/${{ github.repository }}/${{ secrets.DOCKER_CONTAINER_NAME }}:v1.0.0
