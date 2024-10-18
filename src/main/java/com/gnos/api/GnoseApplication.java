@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 @EnableAutoConfiguration
 @RestController
 @RequestMapping("/api")
-public class GnosApplication {
+public class GnoseApplication {
 
 	@GetMapping
 	public String applicationStatus() {
@@ -19,7 +19,7 @@ public class GnosApplication {
 	}
 
 	public static void main(String[] args) {
-		SpringApplication.run(GnosApplication.class, args);
+		SpringApplication.run(GnoseApplication.class, args);
 	}
 
 }

@@ -1,5 +1,6 @@
 package com.gnos.api.web;
 
+import com.gnos.api.model.Quote;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

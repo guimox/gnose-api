@@ -2,6 +2,7 @@ package com.gnos.api.web;
 
 import com.gnos.api.ai.OpenAiCorrectionService;
 import com.gnos.api.ai.OpenAiModerationService;
+import com.gnos.api.model.Quote;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

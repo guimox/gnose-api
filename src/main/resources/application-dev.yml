@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://db:5432/quotes_db
+    username: admin
+    password: secret123
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  application:
+    name: gnos-backend
+
+  ai:
+    openai:
+      api-key: 123
+      chat:
+        options:
+          model: gpt-4o-mini

@@ -1,4 +1,4 @@
-package com.gnos.api.web;
+package com.gnos.api.model;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
