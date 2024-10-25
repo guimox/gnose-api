@@ -25,9 +25,15 @@
             </activation>
         </profile>
         <profile>
-            <id>prod</id>
+            <id>prd</id>
             <properties>
-                <activatedProperties>prod</activatedProperties>
+                <activatedProperties>prd</activatedProperties>
+            </properties>
+        </profile>
+        <profile>
+            <id>hlg</id>
+            <properties>
+                <activatedProperties>hlg</activatedProperties>
             </properties>
         </profile>
     </profiles>
