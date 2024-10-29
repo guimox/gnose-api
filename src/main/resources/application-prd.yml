@@ -1,13 +1,10 @@
-server:
-  port: 8081
-
 spring:
   datasource:
-    url: {DATABASE_URL}
+    url: ${DATABASE_URL}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update  
+      ddl-auto: update
     show-sql: true
 
   application:
@@ -15,7 +12,7 @@ spring:
 
   ai:
     openai:
-      api-key: {OPENAI_TOKEN}
+      api-key: ${OPENAI_TOKEN}
       chat:
         options:
           model: gpt-4o-mini

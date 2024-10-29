@@ -37,7 +37,7 @@ jobs:
         run: mvn clean package --file pom.xml
         env:
           OPENAI_TOKEN: ${{ secrets.OPENAI_TOKEN }}
-          DATABASE_CONNECTION: ${{ secrets.SUPABASE_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Build Docker Image
         uses: docker/build-push-action@v4
