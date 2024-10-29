@@ -35,9 +35,6 @@ jobs:
 
       - name: Build the App
         run: mvn clean package --file pom.xml
-        env:
-          OPENAI_TOKEN: ${{ secrets.OPENAI_TOKEN }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Build Docker Image
         uses: docker/build-push-action@v4
@@ -68,10 +65,16 @@ jobs:
           port: ${{ secrets.VPS_PORT }}
           script: |
             echo "${{ secrets.PAT_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
-
+            
             docker pull ghcr.io/${{ github.repository }}/${{ secrets.DOCKER_CONTAINER_NAME }}:v1.0.0
-
+            
             docker stop ${{ secrets.DOCKER_CONTAINER_NAME }} || true
             docker rm ${{ secrets.DOCKER_CONTAINER_NAME }} || true
-
-            docker run -d --name "${{ secrets.DOCKER_CONTAINER_NAME }}" --restart unless-stopped -p 8081:8081 ghcr.io/${{ github.repository }}/${{ secrets.DOCKER_CONTAINER_NAME }}:v1.0.0
+            
+            docker run -d \
+              --name "${{ secrets.DOCKER_CONTAINER_NAME }}" \
+              --restart unless-stopped \
+              -p 8081:8081 \
+              -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+              -e OPENAI_TOKEN="${{ secrets.OPENAI_TOKEN }}" \
+              ghcr.io/${{ github.repository }}/${{ secrets.DOCKER_CONTAINER_NAME }}:v1.0.0
