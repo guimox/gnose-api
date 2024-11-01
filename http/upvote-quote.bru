@@ -1,0 +1,18 @@
+meta {
+  name: upvote_quote
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:8081/api/quotes/2/upvote
+  body: json
+  auth: none
+}
+
+headers {
+  Origin: https://gnose.app
+  Content-Type: application/json
+  Accept: application/json
+  X-Requested-With: XMLHttpRequest
+}

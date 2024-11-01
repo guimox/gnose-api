@@ -1,0 +1,18 @@
+meta {
+  name: downvote_quote
+  type: http
+  seq: 5
+}
+
+post {
+  url: http://localhost:8081/api/quotes/1/downvote
+  body: json
+  auth: none
+}
+
+headers {
+  Origin: https://gnose.app
+  Content-Type: application/json
+  Accept: application/json
+  X-Requested-With: XMLHttpRequest
+}
