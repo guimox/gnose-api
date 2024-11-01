@@ -16,6 +16,9 @@ public class Quote {
     @Column(nullable = false)
     private String quote;
 
+    @Column(nullable = false)
+    private Integer votes;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
@@ -23,15 +26,24 @@ public class Quote {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    public Quote() {}
+    public Quote() {
+        this.votes = 0;
+    }
 
     public Quote(String quote) {
         this.quote = quote;
     }
 
-    // Getters and Setters
     public Integer getId() {
         return id;
+    }
+
+    public Integer getVotes() {
+        return votes;
+    }
+
+    public void setVotes(Integer votes) {
+        this.votes = votes;
     }
 
     public void setId(Integer id) {

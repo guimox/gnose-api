@@ -14,7 +14,7 @@ public class GnoseApplication {
 
 	@GetMapping
 	public String applicationStatus() {
-		return "Application is up and running, everything okay";
+		return "Application is up and running, everything's okay";
 	}
 
 	public static void main(String[] args) {
