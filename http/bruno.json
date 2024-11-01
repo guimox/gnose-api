@@ -1,6 +1,6 @@
 {
   "version": "1",
-  "name": "gnose-api-http",
+  "name": "gnose-api",
   "type": "collection",
   "ignore": [
     "node_modules",

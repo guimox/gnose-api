@@ -3,6 +3,12 @@ spring:
     url: ${DATABASE_URL}
     driver-class-name: org.postgresql.Driver
 
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    baseline-version: '0'
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -21,10 +27,3 @@ spring:
   devtools:
     restart:
       exclude: logs/**
-
-  logging:
-    level:
-      root: INFO                # Set the default logging level for all packages
-      com.yourpackage: DEBUG     # Replace 'com.yourpackage' with your actual package name to enable DEBUG level logging for that package
-      org.springframework: WARN   # Set Spring framework logging level
-      org.hibernate: WARN        # Set Hibernate logging level

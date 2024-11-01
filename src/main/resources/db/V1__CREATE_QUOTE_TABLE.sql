@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS quote (
+    id SERIAL PRIMARY KEY,
+    text VARCHAR(255),
+    votes INTEGER DEFAULT 0
+);
