@@ -76,8 +76,6 @@ public class QuoteService {
         quoteRepository.decrementVotesByOne(quoteId);
     }
 
-
-
     private String generateHashId(String quoteText, Instant timestamp) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("SHA-256");
 

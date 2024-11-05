@@ -66,5 +66,6 @@ jobs:
               --restart unless-stopped \
               -p 8081:8081 \
               -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+              -e SECRET_KEY_APP="${{ secrets.SECRET_KEY_APP }}" \
               -e OPENAI_TOKEN="${{ secrets.OPENAI_TOKEN }}" \
               ghcr.io/${{ github.repository }}/${{ secrets.DOCKER_CONTAINER_NAME }}:v1.0.0
