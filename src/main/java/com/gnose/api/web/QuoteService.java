@@ -2,6 +2,8 @@ package com.gnose.api.web;
 
 import com.gnose.api.ai.OpenAiCorrectionService;
 import com.gnose.api.ai.OpenAiModerationService;
+import com.gnose.api.dto.QuoteToCreate;
+import com.gnose.api.mapper.MapQuote;
 import com.gnose.api.model.Quote;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -22,19 +24,20 @@ public class QuoteService {
     private final QuoteRepository quoteRepository;
     private final OpenAiModerationService moderationService;
     private final OpenAiCorrectionService correctionService;
-    private final Map<String, Quote> temporaryQuotes = new ConcurrentHashMap<>();
+    private final Map<String, QuoteToCreate> temporaryQuotes = new ConcurrentHashMap<>();
     private static final long EXPIRY_DURATION_MS = 10 * 60 * 1000; // 10 minutes
 
     @Value("${spring.app.secretKey}")
     private String secretKey;
 
-    public QuoteService(QuoteRepository quoteRepository, OpenAiModerationService moderationService, OpenAiCorrectionService correctionService) {
+    public QuoteService(QuoteRepository quoteRepository, OpenAiModerationService moderationService,
+                        OpenAiCorrectionService correctionService) {
         this.quoteRepository = quoteRepository;
         this.moderationService = moderationService;
         this.correctionService = correctionService;
     }
 
-    public String correctAndStoreQuote(String quoteText) throws NoSuchAlgorithmException {
+    public QuoteToCreate correctAndStoreQuote(String quoteText) throws NoSuchAlgorithmException {
         String correctedQuote = correctionService.correctAndDetectValidQuote(quoteText);
         String moderationResult = moderationService.moderateText(correctedQuote);
 
@@ -44,19 +47,20 @@ public class QuoteService {
 
         Instant timestamp = Instant.now();
         String hashId = generateHashId(correctedQuote, timestamp);
-        Quote quote = new Quote();
-        quote.setQuote(correctedQuote);
-        quote.setTimestamp(timestamp);
-        temporaryQuotes.put(hashId, quote);
+        QuoteToCreate quoteToCreate = new QuoteToCreate(correctedQuote, hashId, timestamp);
+        temporaryQuotes.put(hashId, quoteToCreate);
 
-        return hashId;
+        return quoteToCreate;
     }
 
     public Quote addQuoteWithHashId(String hashId) {
-        Quote quote = temporaryQuotes.remove(hashId);
-        if (quote == null) {
+        QuoteToCreate quoteToCreate = temporaryQuotes.remove(hashId);
+        if (quoteToCreate == null) {
             throw new IllegalArgumentException("Invalid or expired quote hash.");
         }
+
+        Quote quote = MapQuote.toEntity(quoteToCreate);
+
         return quoteRepository.save(quote);
     }
 

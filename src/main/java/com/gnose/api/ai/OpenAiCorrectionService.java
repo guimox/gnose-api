@@ -41,8 +41,8 @@ public class OpenAiCorrectionService {
             ChatRequest request = new ChatRequest(model, "You are an expert in identifying meaningful and impactful quotes. " + "Correct the following input by fixing any spelling, grammar, or word usage mistakes. " + "Avoid casual greetings, questions like 'hi, how are you?', or random sentences like 'a car is " + "red'. " + "If the input is not a valid quote return 'This is not a valid quote.' " + "Correct this: " + phraseToCheck);
 
             ChatResponse response = restTemplate.postForObject(OPENAI_API_URL, request, ChatResponse.class);
-
             assert response != null;
+
             String correctedText = response.getChoices().get(0).getMessage().getContent();
 
             if (correctedText.toLowerCase().contains("this is not a valid quote")) {

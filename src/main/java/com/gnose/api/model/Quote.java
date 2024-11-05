@@ -27,8 +27,6 @@ public class Quote {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    private Instant timestamp;
-
     public Quote() {
         this.votes = 0;
     }
@@ -77,11 +75,4 @@ public class Quote {
         this.updatedAt = updatedAt;
     }
 
-    public Instant getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(Instant timestamp) {
-        this.timestamp = timestamp;
-    }
 }

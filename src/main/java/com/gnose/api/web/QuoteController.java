@@ -1,5 +1,7 @@
 package com.gnose.api.web;
 
+import com.gnose.api.dto.QuoteRequest;
+import com.gnose.api.dto.QuoteToCreate;
 import com.gnose.api.model.Quote;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +19,10 @@ public class QuoteController {
     private QuoteService quoteService;
 
     @PostMapping("/correct")
-    public ResponseEntity<String> correctAndStoreQuote(@RequestBody String quoteText) {
+    public ResponseEntity<?> correctAndStoreQuote(@RequestBody QuoteRequest quoteRequest) {
         try {
-            String hashId = quoteService.correctAndStoreQuote(quoteText);
-            return ResponseEntity.ok(hashId);
+            QuoteToCreate quoteToCreate = quoteService.correctAndStoreQuote(quoteRequest.getQuote());
+            return ResponseEntity.ok(quoteToCreate);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
