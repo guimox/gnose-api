@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Entity
@@ -25,6 +26,8 @@ public class Quote {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    private Instant timestamp;
 
     public Quote() {
         this.votes = 0;
@@ -72,5 +75,13 @@ public class Quote {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Instant getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Instant timestamp) {
+        this.timestamp = timestamp;
     }
 }

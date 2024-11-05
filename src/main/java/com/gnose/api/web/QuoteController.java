@@ -17,15 +17,23 @@ public class QuoteController {
     private QuoteService quoteService;
 
     @PostMapping("/correct")
-    public ResponseEntity<String> correctQuote(@RequestBody String quoteText) {
-        String correctedQuote = quoteService.correctQuote(quoteText);
-        return ResponseEntity.ok(correctedQuote);
+    public ResponseEntity<String> correctAndStoreQuote(@RequestBody String quoteText) {
+        try {
+            String hashId = quoteService.correctAndStoreQuote(quoteText);
+            return ResponseEntity.ok(hashId);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping
-    public ResponseEntity<Quote> createQuote(@Valid @RequestBody Quote quote) {
-        Quote savedQuote = quoteService.addQuote(quote);
-        return ResponseEntity.ok(savedQuote);
+    public ResponseEntity<Quote> createQuote(@RequestParam String hashId) {
+        try {
+            Quote savedQuote = quoteService.addQuoteWithHashId(hashId);
+            return ResponseEntity.ok(savedQuote);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
     }
 
     @GetMapping
