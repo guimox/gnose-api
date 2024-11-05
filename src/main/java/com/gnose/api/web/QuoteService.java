@@ -11,7 +11,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -57,6 +59,24 @@ public class QuoteService {
         }
         return quoteRepository.save(quote);
     }
+
+    public List<Quote> getAllQuotes() {
+        return quoteRepository.findAll();
+    }
+
+    public Optional<Quote> getQuoteById(Integer id) {
+        return quoteRepository.findById(id);
+    }
+
+    public void upvoteQuote(int quoteId) {
+        quoteRepository.incrementVotesByOne(quoteId);
+    }
+
+    public void downvoteQuote(int quoteId) {
+        quoteRepository.decrementVotesByOne(quoteId);
+    }
+
+
 
     private String generateHashId(String quoteText, Instant timestamp) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("SHA-256");
