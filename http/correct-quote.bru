@@ -1,11 +1,11 @@
 meta {
   name: correct_quote
   type: http
-  seq: 5
+  seq: 2
 }
 
 post {
-  url: http://localhost:8081/api/quotes/correct
+  url: http://localhost:8081/quotes/correct
   body: json
   auth: none
 }
@@ -19,6 +19,6 @@ headers {
 
 body:json {
   {
-    "quote": "Live your life surounded by famil"
+    "quote": "Day by day, make yoursela better"
   }
 }

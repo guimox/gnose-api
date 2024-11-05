@@ -5,9 +5,13 @@ meta {
 }
 
 post {
-  url: http://localhost:8081/api/quotes
+  url: http://localhost:8081/quotes?hashId=44f11b9c3f3529b1491b5a52d4ac3035a8dd22eab80989cccd0c33c3585e11db
   body: json
   auth: none
+}
+
+query {
+  hashId: 44f11b9c3f3529b1491b5a52d4ac3035a8dd22eab80989cccd0c33c3585e11db
 }
 
 headers {
