@@ -25,7 +25,7 @@ public class QuoteService {
     private final Map<String, Quote> temporaryQuotes = new ConcurrentHashMap<>();
     private static final long EXPIRY_DURATION_MS = 10 * 60 * 1000; // 10 minutes
 
-    @Value("${app.secretKey}")
+    @Value("${spring.app.secretKey}")
     private String secretKey;
 
     public QuoteService(QuoteRepository quoteRepository, OpenAiModerationService moderationService, OpenAiCorrectionService correctionService) {
