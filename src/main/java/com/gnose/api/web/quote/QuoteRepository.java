@@ -1,4 +1,4 @@
-package com.gnose.api.web;
+package com.gnose.api.web.quote;
 
 import com.gnose.api.model.Quote;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,4 +19,7 @@ public interface QuoteRepository extends JpaRepository<Quote, Integer> {
     @Modifying
     @Query("UPDATE Quote q SET q.votes = q.votes - 1 WHERE q.id = :quoteId")
     void decrementVotesByOne(int quoteId);
+
+    @Query("SELECT q.votes FROM Quote q WHERE q.id = :quoteId")
+    int findVotesByQuoteId(int quoteId);
 }

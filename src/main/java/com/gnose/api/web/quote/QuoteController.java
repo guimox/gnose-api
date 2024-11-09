@@ -1,15 +1,16 @@
-package com.gnose.api.web;
+package com.gnose.api.web.quote;
 
-import com.gnose.api.dto.QuoteRequest;
-import com.gnose.api.dto.QuoteToCreate;
+import com.gnose.api.dto.quote.QuoteRequest;
+import com.gnose.api.dto.quote.QuoteResponseDTO;
+import com.gnose.api.dto.quote.QuoteToCreate;
 import com.gnose.api.model.Quote;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/quotes")
@@ -29,14 +30,15 @@ public class QuoteController {
     }
 
     @PostMapping
-    public ResponseEntity<Quote> createQuote(@RequestParam String hashId) {
+    public ResponseEntity<QuoteResponseDTO> createQuote(@RequestParam String hashId) {
         try {
-            Quote savedQuote = quoteService.addQuoteWithHashId(hashId);
-            return ResponseEntity.ok(savedQuote);
+            QuoteResponseDTO responseDto = quoteService.addQuoteWithHashId(hashId);
+            return ResponseEntity.ok(responseDto);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(null);
         }
     }
+
 
     @GetMapping
     public List<Quote> getAllQuotes() {
@@ -49,15 +51,25 @@ public class QuoteController {
     }
 
     @PostMapping("/{quoteId}/upvote")
-    public ResponseEntity<String> upvoteQuote(@PathVariable int quoteId) {
-        quoteService.upvoteQuote(quoteId);
-        return new ResponseEntity<>("Quote upvoted successfully", HttpStatus.OK);
+    public ResponseEntity<?> upvoteQuote(@PathVariable int quoteId) {
+        int voteUpdated = quoteService.upvoteQuote(quoteId);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("votes", voteUpdated);
+        response.put("message", "Successfully upvoted");
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{quoteId}/downvote")
-    public ResponseEntity<String> downvoteQuote(@PathVariable int quoteId) {
-        quoteService.downvoteQuote(quoteId);
-        return new ResponseEntity<>("Quote downvoted successfully", HttpStatus.OK);
+    public ResponseEntity<?> downvoteQuote(@PathVariable int quoteId) {
+        int voteUpdated = quoteService.downvoteQuote(quoteId);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("votes", voteUpdated);
+        response.put("message", "Successfully downvoted");
+
+        return ResponseEntity.ok(response);
     }
 
 //    @DeleteMapping("/{id}")

@@ -1,10 +1,16 @@
-package com.gnose.api.web;
+package com.gnose.api.web.quote;
 
 import com.gnose.api.ai.OpenAiCorrectionService;
 import com.gnose.api.ai.OpenAiModerationService;
-import com.gnose.api.dto.QuoteToCreate;
+import com.gnose.api.dto.quote.QuoteResponse;
+import com.gnose.api.dto.quote.QuoteResponseDTO;
+import com.gnose.api.dto.quote.QuoteToCreate;
 import com.gnose.api.mapper.MapQuote;
+import com.gnose.api.model.Category;
+import com.gnose.api.model.Language;
 import com.gnose.api.model.Quote;
+import com.gnose.api.web.category.CategoryRepository;
+import com.gnose.api.web.language.LanguageRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -24,6 +30,8 @@ public class QuoteService {
     private final QuoteRepository quoteRepository;
     private final OpenAiModerationService moderationService;
     private final OpenAiCorrectionService correctionService;
+    private final CategoryRepository categoryRepository;
+    private final LanguageRepository languageRepository;
     private final Map<String, QuoteToCreate> temporaryQuotes = new ConcurrentHashMap<>();
     private static final long EXPIRY_DURATION_MS = 10 * 60 * 1000; // 10 minutes
 
@@ -31,37 +39,54 @@ public class QuoteService {
     private String secretKey;
 
     public QuoteService(QuoteRepository quoteRepository, OpenAiModerationService moderationService,
-                        OpenAiCorrectionService correctionService) {
+                        OpenAiCorrectionService correctionService, CategoryRepository categoryRepository, LanguageRepository languageRepository) {
         this.quoteRepository = quoteRepository;
         this.moderationService = moderationService;
         this.correctionService = correctionService;
+        this.categoryRepository = categoryRepository;
+        this.languageRepository = languageRepository;
     }
 
-    public QuoteToCreate correctAndStoreQuote(String quoteText) throws NoSuchAlgorithmException {
-        String correctedQuote = correctionService.correctAndDetectValidQuote(quoteText);
-        String moderationResult = moderationService.moderateText(correctedQuote);
 
-        if (moderationResult.equals("The content is inappropriate.")) {
+    public QuoteToCreate correctAndStoreQuote(String quoteText) throws NoSuchAlgorithmException {
+        QuoteResponse quoteResponse = correctionService.correctAndDetectValidQuote(quoteText);
+        String moderationResult = moderationService.moderateText(quoteResponse.getCorrectedQuote());
+
+        if ("The content is inappropriate.".equals(moderationResult)) {
             throw new IllegalArgumentException("The quote contains inappropriate content and cannot be added.");
         }
 
         Instant timestamp = Instant.now();
-        String hashId = generateHashId(correctedQuote, timestamp);
-        QuoteToCreate quoteToCreate = new QuoteToCreate(correctedQuote, hashId, timestamp);
+        String hashId = generateHashId(quoteResponse.getCorrectedQuote(), timestamp);
+
+        QuoteToCreate quoteToCreate = new QuoteToCreate(
+                quoteResponse.getCorrectedQuote(),
+                hashId,
+                timestamp,
+                quoteResponse.getLanguage(),
+                quoteResponse.getCategory()
+        );
         temporaryQuotes.put(hashId, quoteToCreate);
 
         return quoteToCreate;
     }
 
-    public Quote addQuoteWithHashId(String hashId) {
+    public QuoteResponseDTO addQuoteWithHashId(String hashId) {
         QuoteToCreate quoteToCreate = temporaryQuotes.remove(hashId);
         if (quoteToCreate == null) {
             throw new IllegalArgumentException("Invalid or expired quote hash.");
         }
 
-        Quote quote = MapQuote.toEntity(quoteToCreate);
+        Language language = languageRepository.findByName(quoteToCreate.getLanguage())
+                .orElseGet(() -> languageRepository.save(new Language(quoteToCreate.getLanguage())));
 
-        return quoteRepository.save(quote);
+        Category category = categoryRepository.findByName(quoteToCreate.getCategory())
+                .orElseGet(() -> categoryRepository.save(new Category(quoteToCreate.getCategory())));
+
+        Quote quote = MapQuote.toEntity(quoteToCreate, language, category);
+
+        Quote savedQuote = quoteRepository.save(quote);
+        return MapQuote.toResponseDto(savedQuote);
     }
 
     public List<Quote> getAllQuotes() {
@@ -72,13 +97,16 @@ public class QuoteService {
         return quoteRepository.findById(id);
     }
 
-    public void upvoteQuote(int quoteId) {
+    public int upvoteQuote(int quoteId) {
         quoteRepository.incrementVotesByOne(quoteId);
+        return quoteRepository.findVotesByQuoteId(quoteId);
     }
 
-    public void downvoteQuote(int quoteId) {
+    public int downvoteQuote(int quoteId) {
         quoteRepository.decrementVotesByOne(quoteId);
+        return quoteRepository.findVotesByQuoteId(quoteId);
     }
+
 
     private String generateHashId(String quoteText, Instant timestamp) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("SHA-256");

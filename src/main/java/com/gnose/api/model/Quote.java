@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Entity
@@ -20,6 +19,14 @@ public class Quote {
     @Column(nullable = false)
     private Integer votes;
 
+    @ManyToOne
+    @JoinColumn(name = "language_id")
+    private Language language;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
@@ -31,20 +38,15 @@ public class Quote {
         this.votes = 0;
     }
 
-    public Quote(String quote) {
+    public Quote(String quote, Language language, Category category) {
         this.quote = quote;
+        this.language = language;
+        this.category = category;
+        this.votes = 0;
     }
 
     public Integer getId() {
         return id;
-    }
-
-    public Integer getVotes() {
-        return votes;
-    }
-
-    public void setVotes(Integer votes) {
-        this.votes = votes;
     }
 
     public void setId(Integer id) {
@@ -57,6 +59,30 @@ public class Quote {
 
     public void setQuote(String quote) {
         this.quote = quote;
+    }
+
+    public Integer getVotes() {
+        return votes;
+    }
+
+    public void setVotes(Integer votes) {
+        this.votes = votes;
+    }
+
+    public Language getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(Language language) {
+        this.language = language;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -74,5 +100,4 @@ public class Quote {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
-
 }

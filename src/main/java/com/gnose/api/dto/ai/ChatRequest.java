@@ -1,4 +1,4 @@
-package com.gnose.api.dto;
+package com.gnose.api.dto.ai;
 
 import java.util.ArrayList;
 import java.util.List;

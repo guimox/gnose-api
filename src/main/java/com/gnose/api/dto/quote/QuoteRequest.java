@@ -1,4 +1,4 @@
-package com.gnose.api.dto;
+package com.gnose.api.dto.quote;
 
 public class QuoteRequest {
     private String quote;
