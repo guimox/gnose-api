@@ -23,7 +23,7 @@ public class MapQuote {
     public static QuoteToCreate toDto(Quote quote) {
         return new QuoteToCreate(
                 quote.getQuote(),
-                null,  // hashId not required for DTO
+                null,
                 quote.getCreatedAt().atZone(java.time.ZoneId.systemDefault()).toInstant(),
                 quote.getLanguage().getName(),
                 quote.getCategory().getName()

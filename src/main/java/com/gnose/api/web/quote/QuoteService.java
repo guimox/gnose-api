@@ -12,6 +12,10 @@ import com.gnose.api.model.Quote;
 import com.gnose.api.web.category.CategoryRepository;
 import com.gnose.api.web.language.LanguageRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +23,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -47,10 +50,16 @@ public class QuoteService {
         this.languageRepository = languageRepository;
     }
 
-
     public QuoteToCreate correctAndStoreQuote(String quoteText) throws NoSuchAlgorithmException {
         QuoteResponse quoteResponse = correctionService.correctAndDetectValidQuote(quoteText);
+        if (quoteResponse == null || quoteResponse.getCorrectedQuote() == null) {
+            throw new IllegalArgumentException("Quote correction failed or returned null.");
+        }
+
         String moderationResult = moderationService.moderateText(quoteResponse.getCorrectedQuote());
+        if (moderationResult == null) {
+            throw new IllegalArgumentException("Moderation service returned no result.");
+        }
 
         if ("The content is inappropriate.".equals(moderationResult)) {
             throw new IllegalArgumentException("The quote contains inappropriate content and cannot be added.");
@@ -66,10 +75,11 @@ public class QuoteService {
                 quoteResponse.getLanguage(),
                 quoteResponse.getCategory()
         );
-        temporaryQuotes.put(hashId, quoteToCreate);
 
+        temporaryQuotes.put(hashId, quoteToCreate);
         return quoteToCreate;
     }
+
 
     public QuoteResponseDTO addQuoteWithHashId(String hashId) {
         QuoteToCreate quoteToCreate = temporaryQuotes.remove(hashId);
@@ -89,9 +99,11 @@ public class QuoteService {
         return MapQuote.toResponseDto(savedQuote);
     }
 
-    public List<Quote> getAllQuotes() {
-        return quoteRepository.findAll();
+    public Page<Quote> getAllQuotes(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        return quoteRepository.findAll(pageable);
     }
+
 
     public Optional<Quote> getQuoteById(Integer id) {
         return quoteRepository.findById(id);

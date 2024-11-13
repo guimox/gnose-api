@@ -42,7 +42,9 @@ public class OpenAiCorrectionService {
             ChatRequest request = new ChatRequest(
                     model,
                     "You are an expert in identifying and categorizing meaningful and impactful quotes. " +
-                            "Correct any spelling, grammar, or word usage mistakes in the input. Identify the language of the input. " +
+                            "Correct any spelling, grammar, or word usage mistakes in the input. Always remove ? or " +
+                            "!, putting the final period in the quote. " +
+                            "Identify the language of the input. " +
                             "If the input is not a valid quote, return 'This is not a valid quote.' " +
                             "If it is valid, categorize the quote as 'Motivational,' 'Humorous,' 'Philosophical,' or 'Other,' and " +
                             "provide both the corrected quote, language used, and the category label. Correct this: " + phraseToCheck

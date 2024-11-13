@@ -5,11 +5,11 @@ import com.gnose.api.dto.quote.QuoteResponseDTO;
 import com.gnose.api.dto.quote.QuoteToCreate;
 import com.gnose.api.model.Quote;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -41,8 +41,19 @@ public class QuoteController {
 
 
     @GetMapping
-    public List<Quote> getAllQuotes() {
-        return quoteService.getAllQuotes();
+    public ResponseEntity<Map<String, Object>> getAllQuotes(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) {
+        Page<Quote> quotePage = quoteService.getAllQuotes(page, size);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("quotes", quotePage.getContent());
+        response.put("currentPage", quotePage.getNumber());
+        response.put("totalItems", quotePage.getTotalElements());
+        response.put("totalPages", quotePage.getTotalPages());
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
