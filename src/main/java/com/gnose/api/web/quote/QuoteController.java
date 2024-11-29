@@ -39,7 +39,6 @@ public class QuoteController {
         }
     }
 
-
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAllQuotes(
             @RequestParam(defaultValue = "0") int page,

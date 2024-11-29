@@ -80,7 +80,6 @@ public class QuoteService {
         return quoteToCreate;
     }
 
-
     public QuoteResponseDTO addQuoteWithHashId(String hashId) {
         QuoteToCreate quoteToCreate = temporaryQuotes.remove(hashId);
         if (quoteToCreate == null) {
@@ -101,7 +100,7 @@ public class QuoteService {
 
     public Page<Quote> getAllQuotes(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-        return quoteRepository.findAll(pageable);
+        return quoteRepository.findAllByOrderByIdDesc(pageable);
     }
 
 

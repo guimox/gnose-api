@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public interface QuoteRepository extends JpaRepository<Quote, Integer> {
 
-    Page<Quote> findAll(Pageable pageable);
+    Page<Quote> findAllByOrderByIdDesc(Pageable pageable);
 
     @Transactional
     @Modifying
