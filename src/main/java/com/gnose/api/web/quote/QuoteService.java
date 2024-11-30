@@ -25,6 +25,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -36,6 +37,7 @@ public class QuoteService {
     private final CategoryRepository categoryRepository;
     private final LanguageRepository languageRepository;
     private final Map<String, QuoteToCreate> temporaryQuotes = new ConcurrentHashMap<>();
+
     private static final long EXPIRY_DURATION_MS = 10 * 60 * 1000; // 10 minutes
 
     @Value("${spring.app.secretKey}")
@@ -78,6 +80,14 @@ public class QuoteService {
 
         temporaryQuotes.put(hashId, quoteToCreate);
         return quoteToCreate;
+    }
+
+    public QuoteResponseDTO getRandomQuote() {
+        long totalQuotes = quoteRepository.count();
+        int randomIndex = new Random().nextInt((int) totalQuotes);
+        Pageable pageable = PageRequest.of(randomIndex, 1);
+        Page<Quote> randomQuotePage = quoteRepository.findAll(pageable);
+        return MapQuote.toResponseDto(randomQuotePage.getContent().get(0));
     }
 
     public QuoteResponseDTO addQuoteWithHashId(String hashId) {

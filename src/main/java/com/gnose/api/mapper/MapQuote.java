@@ -33,7 +33,6 @@ public class MapQuote {
     public static QuoteResponseDTO toResponseDto(Quote quote) {
         QuoteResponseDTO dto = new QuoteResponseDTO();
         dto.setQuote(quote.getQuote());
-        dto.setVotes(quote.getVotes());
         dto.setCreatedAt(quote.getCreatedAt());
         dto.setUpdatedAt(quote.getUpdatedAt());
 

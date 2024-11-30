@@ -11,13 +11,17 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/quotes")
 public class QuoteController {
 
-    @Autowired
-    private QuoteService quoteService;
+    private final QuoteService quoteService;
+
+    public QuoteController(QuoteService quoteService) {
+        this.quoteService = quoteService;
+    }
 
     @PostMapping("/correct")
     public ResponseEntity<?> correctAndStoreQuote(@RequestBody QuoteRequest quoteRequest) {
@@ -27,6 +31,12 @@ public class QuoteController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @GetMapping("/random")
+    public ResponseEntity<QuoteResponseDTO> getRandomQuote() {
+        QuoteResponseDTO randomQuote = quoteService.getRandomQuote();
+        return ResponseEntity.ok(randomQuote);
     }
 
     @PostMapping
@@ -40,10 +50,7 @@ public class QuoteController {
     }
 
     @GetMapping
-    public ResponseEntity<Map<String, Object>> getAllQuotes(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size
-    ) {
+    public ResponseEntity<Map<String, Object>> getAllQuotes(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
         Page<Quote> quotePage = quoteService.getAllQuotes(page, size);
 
         Map<String, Object> response = new HashMap<>();
