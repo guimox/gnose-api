@@ -3,15 +3,16 @@ package com.gnose.api.web.quote;
 import com.gnose.api.dto.quote.QuoteRequest;
 import com.gnose.api.dto.quote.QuoteResponseDTO;
 import com.gnose.api.dto.quote.QuoteToCreate;
+import com.gnose.api.model.Category;
+import com.gnose.api.model.Language;
 import com.gnose.api.model.Quote;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/quotes")
@@ -31,6 +32,28 @@ public class QuoteController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Map<String, Object>> searchQuotes(
+            @RequestParam(required = false) String quote,
+            @RequestParam(required = false) Integer categoryId,
+            @RequestParam(required = false) Integer languageId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+
+        Category category = categoryId != null ? new Category(categoryId) : null;
+        Language language = languageId != null ? new Language(languageId) : null;
+
+        Page<Quote> quotePage = quoteService.searchQuotes(quote, category, language, page, size);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("quotes", quotePage.getContent());
+        response.put("currentPage", quotePage.getNumber());
+        response.put("totalItems", quotePage.getTotalElements());
+        response.put("totalPages", quotePage.getTotalPages());
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/random")

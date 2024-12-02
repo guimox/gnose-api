@@ -13,6 +13,10 @@ public class Language {
 
     public Language() {}
 
+    public Language(Integer id) {
+        this.id = id;
+    }
+
     public Language(String name) {
         this.name = name;
     }

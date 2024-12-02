@@ -11,6 +11,10 @@ public class Category {
     @Column(nullable = false, unique = true)
     private String name;
 
+    public Category(Integer id) {
+        this.id = id;
+    }
+
     public Category() {}
 
     public Category(String name) {

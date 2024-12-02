@@ -1,5 +1,7 @@
 package com.gnose.api.web.quote;
 
+import com.gnose.api.model.Category;
+import com.gnose.api.model.Language;
 import com.gnose.api.model.Quote;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +20,12 @@ public interface QuoteRepository extends JpaRepository<Quote, Integer> {
     @Modifying
     @Query("UPDATE Quote q SET q.votes = q.votes + 1 WHERE q.id = :quoteId")
     void incrementVotesByOne(int quoteId);
+
+    @Query("SELECT q FROM Quote q " +
+            "WHERE (:quote IS NULL OR LOWER(q.quote) LIKE LOWER(CONCAT('%', :quote, '%'))) " +
+            "AND (:category IS NULL OR q.category = :category) " +
+            "AND (:language IS NULL OR q.language = :language)")
+    Page<Quote> searchQuotes(String quote, Category category, Language language, Pageable pageable);
 
     @Transactional
     @Modifying

@@ -52,6 +52,11 @@ public class QuoteService {
         this.languageRepository = languageRepository;
     }
 
+    public Page<Quote> searchQuotes(String quote, Category category, Language language, int page, int size) {
+        PageRequest pageable = PageRequest.of(page, size);
+        return quoteRepository.searchQuotes(quote, category, language, pageable);
+    }
+
     public QuoteToCreate correctAndStoreQuote(String quoteText) throws NoSuchAlgorithmException {
         QuoteResponse quoteResponse = correctionService.correctAndDetectValidQuote(quoteText);
         if (quoteResponse == null || quoteResponse.getCorrectedQuote() == null) {
