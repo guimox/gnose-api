@@ -1,0 +1,26 @@
+meta {
+  name: user_registration
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8081/users/register
+  body: json
+  auth: none
+}
+
+headers {
+  Origin: https://gnose.app
+  Content-Type: application/json
+  Accept: application/json
+  X-Requested-With: XMLHttpRequest
+}
+
+body:json {
+{
+"username": "johndoe",
+"email": "johndoe@example.com",
+"password": "securePassword123"
+}
+}
