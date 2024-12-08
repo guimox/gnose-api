@@ -68,4 +68,8 @@ jobs:
               -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
               -e SECRET_KEY_APP="${{ secrets.SECRET_KEY_APP }}" \
               -e OPENAI_TOKEN="${{ secrets.OPENAI_TOKEN }}" \
+              -e GNOSE_EMAIL="${{ secrets.GNOSE_EMAIL }}" \
+              -e GNOSE_EMAIL_PASSWORD="${{ secrets.GNOSE_EMAIL_PASSWORD }}" \
+              -e JWT_EXPIRATION="${{ secrets.JWT_EXPIRATION }}" \
+              -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
               ghcr.io/${{ github.repository }}/${{ secrets.DOCKER_CONTAINER_NAME }}:v1.0.0

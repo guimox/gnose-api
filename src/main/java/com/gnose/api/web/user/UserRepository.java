@@ -16,4 +16,6 @@ public interface UserRepository extends JpaRepository<UserGnose, Long> {
     Optional<UserGnose> findByEmail(String email);
     Optional<UserGnose> findByPasswordResetToken(String passwordResetToken);
     Optional<UserGnose> findByExternalId(UUID externalId);
+
+    Optional<UserGnose> findByConfirmationToken(String token);
 }

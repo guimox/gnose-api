@@ -12,6 +12,18 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
+    public void sendConfirmationEmail(String to, String confirmationLink) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        String subject = "Confirm Your Registration";
+        String body = "Please click the following link to confirm your registration: " + confirmationLink;
+        message.setFrom("guilhermxlopes@gmail.com");
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(body);
+        mailSender.send(message);
+
+    }
+
     public void sendPasswordResetEmail(String to, String resetLink) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("guilhermxlopes@gmail.com");

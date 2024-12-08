@@ -19,9 +19,25 @@ spring:
   application:
     name: gnos-backend
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: email@email.com
+    password: password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
   ai:
     openai:
       api-key: 123
       chat:
         options:
           model: gpt-4o-mini
+
+  jwt:
+    secret: 123
+    expiration: 3600000

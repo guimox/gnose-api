@@ -28,6 +28,11 @@ public class UserGnose {
     @Column(unique = true, nullable = false)
     private String username;
 
+    @Column(unique = true)
+    private String confirmationToken;
+
+    private LocalDateTime confirmationExpiry;
+
     @Email(message = "Invalid email format")
     @Column(unique = true, nullable = false)
     private String email;
@@ -78,6 +83,22 @@ public class UserGnose {
 
     public void setExternalId(UUID externalId) {
         this.externalId = externalId;
+    }
+
+    public String getConfirmationToken() {
+        return confirmationToken;
+    }
+
+    public void setConfirmationToken(String confirmationToken) {
+        this.confirmationToken = confirmationToken;
+    }
+
+    public LocalDateTime getConfirmationExpiry() {
+        return confirmationExpiry;
+    }
+
+    public void setConfirmationExpiry(LocalDateTime confirmationExpiry) {
+        this.confirmationExpiry = confirmationExpiry;
     }
 
     public @NotBlank(message = "Username is required") String getUsername() {
