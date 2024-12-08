@@ -6,6 +6,6 @@ RUN mvn clean install -DskipTests
 
 FROM eclipse-temurin:17-jdk-jammy
 WORKDIR /app
-COPY --from=build /app/target/gnos-api-0.0.1.jar app.jar
+COPY --from=build /app/target/gnose-api-0.0.1.jar app.jar
 EXPOSE 8081
 ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=prd", "app.jar"]
