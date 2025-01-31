@@ -3,6 +3,15 @@ package com.gnose.api.dto.user;
 public class PasswordResetRequest {
     private String email;
     private String resetUrl;
+    private String newPassword;
+
+    public String getNewPassword() {
+        return newPassword;
+    }
+
+    public void setNewPassword(String newPassword) {
+        this.newPassword = newPassword;
+    }
 
     public String getEmail() {
         return email;

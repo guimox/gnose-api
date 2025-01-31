@@ -1,6 +1,8 @@
 package com.gnose.api.jwt;
 
 import com.gnose.api.security.CustomUserDetailsService;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,6 +15,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.security.Key;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -24,6 +27,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.userDetailsService = userDetailsService;
     }
 
+    @Value("${jwt.auth-secret}")
+    private String authSecret;
+
+    @Value("${jwt.confirmation-secret}")
+    private String confirmationSecret;
+
+    @Value("${jwt.expiration}")
+    private Long expiration;
+
+    private Key getAuthSigningKey() {
+        return Keys.hmacShaKeyFor(authSecret.getBytes());
+    }
+
+    private Key getConfirmationSigningKey() {
+        return Keys.hmacShaKeyFor(confirmationSecret.getBytes());
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -32,11 +52,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String jwt = getJwtFromRequest(request);
 
-            if (jwt != null) {
-                String username = tokenUtil.getUsernameFromToken(jwt);
-                String salt = tokenUtil.getClaimFromToken(jwt, claims -> claims.get("salt", String.class));
+            if (jwt != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                String username = tokenUtil.getUserEmailFromToken(jwt);
 
-                if (tokenUtil.validateToken(jwt, username, salt)) {
+                if (username != null && tokenUtil.validateToken(jwt, username, "auth", getAuthSigningKey())) {
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
                     UsernamePasswordAuthenticationToken authentication =
@@ -50,7 +69,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception ex) {
-            logger.error("Could not set user authentication in security context", ex);
+            logger.error("JWT authentication failed: " + ex.getMessage(), ex);
         }
 
         filterChain.doFilter(request, response);

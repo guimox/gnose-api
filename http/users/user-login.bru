@@ -5,14 +5,14 @@ meta {
 }
 
 post {
-  url: http://localhost:8081/api/auth/login
+  url: http://localhost:8081/users/authenticate
   body: json
   auth: none
 }
 
 body:json {
   {
-    "username": "guilhermxlopes@gmail.com",
+    "email": "guilhermxlopes+axbcxt@gmail.com",
     "password": "123"
   }
 }

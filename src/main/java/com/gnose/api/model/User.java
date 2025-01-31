@@ -10,7 +10,7 @@ import java.util.UUID;
 @Table(name = "users")
 public class User extends BaseModel {
     @NotBlank(message = "Name is required")
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String name;
 
     @Email(message = "Invalid email format")
@@ -37,10 +37,12 @@ public class User extends BaseModel {
 
     @PrePersist
     protected void onCreate() {
+        super.onCreate();
         if (this.authSalt == null) {
             this.authSalt = UUID.randomUUID().toString();
         }
     }
+
 
     public String getName() {
         return name;

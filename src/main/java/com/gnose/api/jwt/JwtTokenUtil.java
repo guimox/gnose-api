@@ -1,7 +1,10 @@
 package com.gnose.api.jwt;
 
+import com.gnose.api.model.User;
+import com.gnose.api.web.user.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,12 +14,12 @@ import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
-
-import static org.springframework.security.config.Elements.JWT;
 
 @Component
 public class JwtTokenUtil {
+
     @Value("${jwt.auth-secret}")
     private String authSecret;
 
@@ -26,72 +29,142 @@ public class JwtTokenUtil {
     @Value("${jwt.expiration}")
     private Long expiration;
 
-    private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes());
+    private static final long ACCESS_TOKEN_EXPIRY = 15 * 60 * 1000;  // 15 minutes
+    private static final long REFRESH_TOKEN_EXPIRY = 7 * 24 * 60 * 60 * 1000; // 7 days
+    private static final long PASSWORD_RESET_TOKEN_EXPIRY = 10 * 60 * 1000; // 10 minutes for password reset
+
+    private final UserRepository userRepository;
+
+    public JwtTokenUtil(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
-    public String generateAuthToken(String username) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("tokenType", "auth"); // Add token type to the claims
-        return doGenerateToken(claims, username);
+    private Key getAuthSigningKey() {
+        return Keys.hmacShaKeyFor(authSecret.getBytes());
     }
 
-    public String generateConfirmationToken(String userEmail) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("tokenType", "confirmation"); // Explicitly set token type
-        return doGenerateToken(claims, userEmail);
+    private Key getConfirmationSigningKey() {
+        return Keys.hmacShaKeyFor(confirmationSecret.getBytes());
     }
 
-    private String doGenerateToken(Map<String, Object> claims, String subject) {
+    public String generateToken(String email, String salt) {
         return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(subject)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiration * 1000))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+                .setSubject(email)
+                .claim("salt", salt)
+                .claim("tokenType", "auth")
+                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRY))
+                .signWith(getAuthSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    // General method to validate tokens (for other use cases)
-    public Boolean validateToken(String token, String username, String expectedTokenType) {
+    public String generateRefreshToken(String email, String salt) {
+        return Jwts.builder()
+                .setSubject(email)
+                .claim("salt", salt)
+                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRY))
+                .signWith(getAuthSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public String getSaltFromToken(String token) {
+        return getClaimFromToken(token, claims -> claims.get("salt", String.class), getAuthSigningKey());
+    }
+
+    // Generate a confirmation token
+    public String generateConfirmationToken(String userEmail) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("tokenType", "confirmation");
+        return doGenerateToken(claims, userEmail, getConfirmationSigningKey());
+    }
+
+    public boolean validatePasswordResetToken(String token, String userEmail) {
         try {
-            final Claims claims = getAllClaimsFromToken(token);
-            return (claims.getSubject().equals(username) &&
+            Claims claims = Jwts.parserBuilder().setSigningKey(getAuthSigningKey()).build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            // Check if token's email matches the provided email and if it hasn't expired
+            return claims.getSubject().equals(userEmail) && claims.getExpiration().after(new Date());
+        } catch (JwtException | IllegalArgumentException e) {
+            return false; // Token is invalid or expired
+        }
+    }
+
+    // Generate a password reset token
+    public String generatePasswordResetToken(String email) {
+        return Jwts.builder()
+                .setSubject(email)
+                .setExpiration(new Date(System.currentTimeMillis() + PASSWORD_RESET_TOKEN_EXPIRY))
+                .signWith(getAuthSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public Boolean validateToken(String token, String userEmail, String expectedTokenType, Key signingKey) {
+        try {
+            Claims claims = getAllClaimsFromToken(token, signingKey);
+            Optional<User> user = userRepository.findByEmail(userEmail);
+            if(user.isEmpty()) return false;
+            return claims.getSubject().equals(userEmail) &&
+                    claims.get("salt", String.class).equals(user.get().getAuthSalt()) &&
                     claims.get("tokenType", String.class).equals(expectedTokenType) &&
-                    !isTokenExpired(token));
-        } catch (Exception e) {
+                    !isTokenExpired(token, signingKey);
+        } catch (JwtException e) {
             return false;
         }
     }
 
-    // Dedicated method for validating confirmation tokens
-    public Boolean validateConfirmationToken(String token, String username) {
-        return validateToken(token, username, "confirmation");
+    // Validate an authentication token
+    public Boolean validateAuthToken(String token, String username) {
+        return validateToken(token, username, "auth", getAuthSigningKey());
     }
 
-    public String getUsernameFromToken(String token) {
-        return getClaimFromToken(token, Claims::getSubject);
+    // Validate a confirmation token
+    public Boolean validateConfirmationToken(String token, String userEmail) {
+        return validateToken(token, userEmail, "confirmation", getConfirmationSigningKey());
     }
 
-    public Date getExpirationDateFromToken(String token) {
-        return getClaimFromToken(token, Claims::getExpiration);
+    // Extract user email from token
+    public String getUserEmailFromToken(String token) {
+        return getClaimFromToken(token, Claims::getSubject, getAuthSigningKey());
     }
 
-    public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = getAllClaimsFromToken(token);
+    // Get expiration date from the confirmation token
+    public Date getExpirationDateFromTokenConfirmation(String token) {
+        return getClaimFromToken(token, Claims::getExpiration, getConfirmationSigningKey());
+    }
+
+    // Extract claim from token
+    private <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver, Key signingKey) {
+        Claims claims = getAllClaimsFromToken(token, signingKey);
         return claimsResolver.apply(claims);
     }
 
-    private Claims getAllClaimsFromToken(String token) {
+    // Get all claims from the token
+    private Claims getAllClaimsFromToken(String token, Key signingKey) {
         return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
+                .setSigningKey(signingKey)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
     }
 
-    private Boolean isTokenExpired(String token) {
-        final Date expiration = getExpirationDateFromToken(token);
+    public Date getExpirationDateFromToken(String token) {
+        return getClaimFromToken(token, Claims::getExpiration, getAuthSigningKey());
+    }
+
+    private Boolean isTokenExpired(String token, Key signingKey) {
+        Date expiration = getExpirationDateFromToken(token);
         return expiration.before(new Date());
+    }
+
+    // Helper method to generate token with specified claims
+    private String doGenerateToken(Map<String, Object> claims, String subject, Key signingKey) {
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(subject)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + expiration * 1000))
+                .signWith(signingKey, SignatureAlgorithm.HS512)
+                .compact();
     }
 }
