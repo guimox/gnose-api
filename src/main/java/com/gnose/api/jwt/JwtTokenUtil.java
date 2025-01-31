@@ -1,4 +1,4 @@
-package com.gnose.api.security;
+package com.gnose.api.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -13,10 +13,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import static org.springframework.security.config.Elements.JWT;
+
 @Component
 public class JwtTokenUtil {
-    @Value("${jwt.secret}")
-    private String secret;
+    @Value("${jwt.auth-secret}")
+    private String authSecret;
+
+    @Value("${jwt.confirmation-secret}")
+    private String confirmationSecret;
 
     @Value("${jwt.expiration}")
     private Long expiration;
@@ -25,10 +30,16 @@ public class JwtTokenUtil {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    public String generateToken(String username, String authSalt) {
+    public String generateAuthToken(String username) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("salt", authSalt);
+        claims.put("tokenType", "auth"); // Add token type to the claims
         return doGenerateToken(claims, username);
+    }
+
+    public String generateConfirmationToken(String userEmail) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("tokenType", "confirmation"); // Explicitly set token type
+        return doGenerateToken(claims, userEmail);
     }
 
     private String doGenerateToken(Map<String, Object> claims, String subject) {
@@ -41,15 +52,21 @@ public class JwtTokenUtil {
                 .compact();
     }
 
-    public Boolean validateToken(String token, String username, String expectedSalt) {
+    // General method to validate tokens (for other use cases)
+    public Boolean validateToken(String token, String username, String expectedTokenType) {
         try {
             final Claims claims = getAllClaimsFromToken(token);
             return (claims.getSubject().equals(username) &&
-                    claims.get("salt", String.class).equals(expectedSalt) &&
+                    claims.get("tokenType", String.class).equals(expectedTokenType) &&
                     !isTokenExpired(token));
         } catch (Exception e) {
             return false;
         }
+    }
+
+    // Dedicated method for validating confirmation tokens
+    public Boolean validateConfirmationToken(String token, String username) {
+        return validateToken(token, username, "confirmation");
     }
 
     public String getUsernameFromToken(String token) {
