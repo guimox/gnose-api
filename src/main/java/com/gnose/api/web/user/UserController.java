@@ -3,13 +3,13 @@ package com.gnose.api.web.user;
 import com.gnose.api.dto.user.LoginRequest;
 import com.gnose.api.dto.user.PasswordResetConfirmRequest;
 import com.gnose.api.dto.user.PasswordResetRequest;
-import com.gnose.api.model.UserGnose;
+import com.gnose.api.dto.user.RegisterRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/users")
 public class UserController {
     private final UserService userService;
 
@@ -18,9 +18,9 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody UserGnose user) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
         try {
-            userService.registerUser(user);
+            userService.registerUser(registerRequest);
             return ResponseEntity.ok("Registration successful! Check your email to confirm your account.");
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
