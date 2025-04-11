@@ -1,4 +1,4 @@
 /target/
-/src/main/resources/
+/src/main/resources/application-hlg.yml
 /.idea/
 /build/

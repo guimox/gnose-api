@@ -27,13 +27,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.userDetailsService = userDetailsService;
     }
 
-    @Value("${jwt.auth-secret}")
+    @Value("${spring.jwt.auth-secret}")
     private String authSecret;
 
-    @Value("${jwt.confirmation-secret}")
+    @Value("${spring.jwt.confirmation-secret}")
     private String confirmationSecret;
 
-    @Value("${jwt.expiration}")
+    @Value("${spring.jwt.expiration}")
     private Long expiration;
 
     private Key getAuthSigningKey() {

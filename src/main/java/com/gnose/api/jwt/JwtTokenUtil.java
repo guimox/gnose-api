@@ -20,24 +20,18 @@ import java.util.function.Function;
 @Component
 public class JwtTokenUtil {
 
-    @Value("${jwt.auth-secret}")
+    @Value("${spring.jwt.auth-secret}")
     private String authSecret;
 
-    @Value("${jwt.confirmation-secret}")
+    @Value("${spring.jwt.confirmation-secret}")
     private String confirmationSecret;
 
-    @Value("${jwt.expiration}")
+    @Value("${spring.jwt.expiration}")
     private Long expiration;
 
     private static final long ACCESS_TOKEN_EXPIRY = 15 * 60 * 1000;  // 15 minutes
     private static final long REFRESH_TOKEN_EXPIRY = 7 * 24 * 60 * 60 * 1000; // 7 days
     private static final long PASSWORD_RESET_TOKEN_EXPIRY = 10 * 60 * 1000; // 10 minutes for password reset
-
-    private final UserRepository userRepository;
-
-    public JwtTokenUtil(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
 
     private Key getAuthSigningKey() {
         return Keys.hmacShaKeyFor(authSecret.getBytes());
@@ -102,10 +96,7 @@ public class JwtTokenUtil {
     public Boolean validateToken(String token, String userEmail, String expectedTokenType, Key signingKey) {
         try {
             Claims claims = getAllClaimsFromToken(token, signingKey);
-            Optional<User> user = userRepository.findByEmail(userEmail);
-            if(user.isEmpty()) return false;
             return claims.getSubject().equals(userEmail) &&
-                    claims.get("salt", String.class).equals(user.get().getAuthSalt()) &&
                     claims.get("tokenType", String.class).equals(expectedTokenType) &&
                     !isTokenExpired(token, signingKey);
         } catch (JwtException e) {
