@@ -74,7 +74,7 @@ public class QuoteController {
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAllQuotes(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
-        Page<Quote> quotePage = quoteService.getAllQuotes(page, size);
+        Page<QuoteResponseDTO> quotePage = quoteService.getAllQuotes(page, size);
 
         Map<String, Object> response = new HashMap<>();
         response.put("quotes", quotePage.getContent());

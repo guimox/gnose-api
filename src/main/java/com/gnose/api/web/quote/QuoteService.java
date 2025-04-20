@@ -113,11 +113,12 @@ public class QuoteService {
         return MapQuote.toResponseDto(savedQuote);
     }
 
-    public Page<Quote> getAllQuotes(int page, int size) {
+    public Page<QuoteResponseDTO> getAllQuotes(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-        return quoteRepository.findAllByOrderByIdDesc(pageable);
-    }
+        Page<Quote> quotesPage = quoteRepository.findAllByOrderByIdDesc(pageable);
 
+        return quotesPage.map(quote -> MapQuote.toResponseDto(quote));
+    }
 
     public Optional<Quote> getQuoteById(Integer id) {
         return quoteRepository.findById(id);
