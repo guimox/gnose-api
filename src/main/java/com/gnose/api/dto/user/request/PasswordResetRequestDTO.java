@@ -1,6 +1,6 @@
-package com.gnose.api.dto.user;
+package com.gnose.api.dto.user.request;
 
-public class PasswordResetRequest {
+public class PasswordResetRequestDTO {
     private String email;
     private String resetUrl;
     private String newPassword;

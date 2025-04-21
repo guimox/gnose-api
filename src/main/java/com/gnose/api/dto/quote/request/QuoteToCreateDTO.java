@@ -1,15 +1,15 @@
-package com.gnose.api.dto.quote;
+package com.gnose.api.dto.quote.request;
 
 import java.time.Instant;
 
-public class QuoteToCreate {
+public class QuoteToCreateDTO {
     private String quote;
     private String hashId;
     private Instant timestamp;
     private String language;
     private String category;
 
-    public QuoteToCreate(String quote, String hashId, Instant timestamp, String language, String category) {
+    public QuoteToCreateDTO(String quote, String hashId, Instant timestamp, String language, String category) {
         this.quote = quote;
         this.hashId = hashId;
         this.timestamp = timestamp;
@@ -17,7 +17,7 @@ public class QuoteToCreate {
         this.category = category;
     }
 
-    public QuoteToCreate() {}
+    public QuoteToCreateDTO() {}
 
     public String getQuote() {
         return quote;

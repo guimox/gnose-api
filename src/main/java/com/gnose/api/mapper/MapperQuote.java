@@ -2,17 +2,17 @@ package com.gnose.api.mapper;
 
 import com.gnose.api.dto.category.CategoryDTO;
 import com.gnose.api.dto.language.LanguageDTO;
-import com.gnose.api.dto.quote.QuoteResponseDTO;
-import com.gnose.api.dto.quote.QuoteToCreate;
+import com.gnose.api.dto.quote.response.QuoteResponseDTO;
+import com.gnose.api.dto.quote.request.QuoteToCreateDTO;
 import com.gnose.api.model.Category;
 import com.gnose.api.model.Language;
 import com.gnose.api.model.Quote;
 
-public class MapQuote {
+public class MapperQuote {
 
-    public static Quote toEntity(QuoteToCreate quoteToCreate, Language language, Category category) {
+    public static Quote toEntity(QuoteToCreateDTO quoteToCreateDTO, Language language, Category category) {
         Quote quote = new Quote();
-        quote.setQuote(quoteToCreate.getQuote());
+        quote.setQuote(quoteToCreateDTO.getQuote());
         quote.setVotes(0);
         quote.setLanguage(language);
         quote.setCategory(category);
@@ -20,8 +20,8 @@ public class MapQuote {
         return quote;
     }
 
-    public static QuoteToCreate toDto(Quote quote) {
-        return new QuoteToCreate(
+    public static QuoteToCreateDTO toDto(Quote quote) {
+        return new QuoteToCreateDTO(
                 quote.getQuote(),
                 null,
                 quote.getCreatedAt().atZone(java.time.ZoneId.systemDefault()).toInstant(),
@@ -36,12 +36,10 @@ public class MapQuote {
         dto.setCreatedAt(quote.getCreatedAt());
         dto.setUpdatedAt(quote.getUpdatedAt());
 
-        LanguageDTO languageDTO = new LanguageDTO();
-        languageDTO.setName(quote.getLanguage().getName());
+        LanguageDTO languageDTO = new LanguageDTO(quote.getLanguage().getName());
         dto.setLanguage(languageDTO);
 
-        CategoryDTO categoryDTO = new CategoryDTO();
-        categoryDTO.setName(quote.getCategory().getName());
+        CategoryDTO categoryDTO = new CategoryDTO(quote.getCategory().getName());
         dto.setCategory(categoryDTO);
 
         return dto;

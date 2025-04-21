@@ -1,16 +1,16 @@
 package com.gnose.api.dto.ai;
 
-public class Message {
+public class ChatMessageDTO {
 
     private String role;
     private String content;
 
-    Message(String role, String content) {
+    ChatMessageDTO(String role, String content) {
         this.role = role;
         this.content = content;
     }
 
-    Message() {
+    ChatMessageDTO() {
     }
 
     public String getRole() {

@@ -1,6 +1,6 @@
-package com.gnose.api.dto.quote;
+package com.gnose.api.dto.quote.request;
 
-public class QuoteRequest {
+public class QuoteRequestDTO {
     private String quote;
 
     public String getQuote() {

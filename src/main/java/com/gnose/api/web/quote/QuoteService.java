@@ -1,11 +1,10 @@
 package com.gnose.api.web.quote;
 
-import com.gnose.api.ai.OpenAiCorrectionService;
-import com.gnose.api.ai.OpenAiModerationService;
-import com.gnose.api.dto.quote.QuoteResponse;
-import com.gnose.api.dto.quote.QuoteResponseDTO;
-import com.gnose.api.dto.quote.QuoteToCreate;
-import com.gnose.api.mapper.MapQuote;
+import com.gnose.api.ai.CorrectionService;
+import com.gnose.api.ai.ModerationService;
+import com.gnose.api.dto.quote.response.QuoteResponseDTO;
+import com.gnose.api.dto.quote.request.QuoteToCreateDTO;
+import com.gnose.api.mapper.MapperQuote;
 import com.gnose.api.model.Category;
 import com.gnose.api.model.Language;
 import com.gnose.api.model.Quote;
@@ -32,19 +31,20 @@ import java.util.concurrent.ConcurrentHashMap;
 public class QuoteService {
 
     private final QuoteRepository quoteRepository;
-    private final OpenAiModerationService moderationService;
-    private final OpenAiCorrectionService correctionService;
+    private final ModerationService moderationService;
+    private final CorrectionService correctionService;
     private final CategoryRepository categoryRepository;
     private final LanguageRepository languageRepository;
-    private final Map<String, QuoteToCreate> temporaryQuotes = new ConcurrentHashMap<>();
+    private final Map<String, QuoteToCreateDTO> temporaryQuotes = new ConcurrentHashMap<>();
 
     private static final long EXPIRY_DURATION_MS = 10 * 60 * 1000; // 10 minutes
 
     @Value("${spring.app.secretKey}")
     private String secretKey;
 
-    public QuoteService(QuoteRepository quoteRepository, OpenAiModerationService moderationService,
-                        OpenAiCorrectionService correctionService, CategoryRepository categoryRepository, LanguageRepository languageRepository) {
+    public QuoteService(QuoteRepository quoteRepository, ModerationService moderationService,
+                        CorrectionService correctionService, CategoryRepository categoryRepository,
+                        LanguageRepository languageRepository) {
         this.quoteRepository = quoteRepository;
         this.moderationService = moderationService;
         this.correctionService = correctionService;
@@ -57,13 +57,13 @@ public class QuoteService {
         return quoteRepository.searchQuotes(quote, category, language, pageable);
     }
 
-    public QuoteToCreate correctAndStoreQuote(String quoteText) throws NoSuchAlgorithmException {
-        QuoteResponse quoteResponse = correctionService.correctAndDetectValidQuote(quoteText);
-        if (quoteResponse == null || quoteResponse.getCorrectedQuote() == null) {
+    public QuoteToCreateDTO correctAndStoreQuote(String quoteText) throws NoSuchAlgorithmException {
+        QuoteResponseDTO quoteResponse = correctionService.correctAndDetectValidQuote(quoteText);
+        if (quoteResponse == null || quoteResponse.getQuote() == null) {
             throw new IllegalArgumentException("Quote correction failed or returned null.");
         }
 
-        String moderationResult = moderationService.moderateText(quoteResponse.getCorrectedQuote());
+        String moderationResult = moderationService.moderateText(quoteResponse.getQuote());
         if (moderationResult == null) {
             throw new IllegalArgumentException("Moderation service returned no result.");
         }
@@ -73,18 +73,18 @@ public class QuoteService {
         }
 
         Instant timestamp = Instant.now();
-        String hashId = generateHashId(quoteResponse.getCorrectedQuote(), timestamp);
+        String hashId = generateHashId(quoteResponse.getQuote(), timestamp);
 
-        QuoteToCreate quoteToCreate = new QuoteToCreate(
-                quoteResponse.getCorrectedQuote(),
+        QuoteToCreateDTO quoteToCreateDTO = new QuoteToCreateDTO(
+                quoteResponse.getQuote(),
                 hashId,
                 timestamp,
-                quoteResponse.getLanguage(),
-                quoteResponse.getCategory()
+                quoteResponse.getLanguage().getName(),
+                quoteResponse.getCategory().getName()
         );
 
-        temporaryQuotes.put(hashId, quoteToCreate);
-        return quoteToCreate;
+        temporaryQuotes.put(hashId, quoteToCreateDTO);
+        return quoteToCreateDTO;
     }
 
     public QuoteResponseDTO getRandomQuote() {
@@ -92,32 +92,38 @@ public class QuoteService {
         int randomIndex = new Random().nextInt((int) totalQuotes);
         Pageable pageable = PageRequest.of(randomIndex, 1);
         Page<Quote> randomQuotePage = quoteRepository.findAll(pageable);
-        return MapQuote.toResponseDto(randomQuotePage.getContent().get(0));
+        return MapperQuote.toResponseDto(randomQuotePage.getContent().get(0));
     }
 
     public QuoteResponseDTO addQuoteWithHashId(String hashId) {
-        QuoteToCreate quoteToCreate = temporaryQuotes.remove(hashId);
-        if (quoteToCreate == null) {
+        QuoteToCreateDTO quoteToCreateDTO = temporaryQuotes.remove(hashId);
+        if (quoteToCreateDTO == null) {
             throw new IllegalArgumentException("Invalid or expired quote hash.");
         }
 
-        Language language = languageRepository.findByName(quoteToCreate.getLanguage())
-                .orElseGet(() -> languageRepository.save(new Language(quoteToCreate.getLanguage())));
+        Language language = languageRepository.findByName(quoteToCreateDTO.getLanguage())
+                .orElseGet(() -> languageRepository.save(new Language(quoteToCreateDTO.getLanguage())));
 
-        Category category = categoryRepository.findByName(quoteToCreate.getCategory())
-                .orElseGet(() -> categoryRepository.save(new Category(quoteToCreate.getCategory())));
+        Category category = categoryRepository.findByName(quoteToCreateDTO.getCategory())
+                .orElseGet(() -> categoryRepository.save(new Category(quoteToCreateDTO.getCategory())));
 
-        Quote quote = MapQuote.toEntity(quoteToCreate, language, category);
+        Optional<Quote> existingQuote = quoteRepository.findByQuote(
+                quoteToCreateDTO.getQuote());
 
+        if (existingQuote.isPresent()) {
+            return MapperQuote.toResponseDto(existingQuote.get());
+        }
+
+        Quote quote = MapperQuote.toEntity(quoteToCreateDTO, language, category);
         Quote savedQuote = quoteRepository.save(quote);
-        return MapQuote.toResponseDto(savedQuote);
+        return MapperQuote.toResponseDto(savedQuote);
     }
 
     public Page<QuoteResponseDTO> getAllQuotes(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
         Page<Quote> quotesPage = quoteRepository.findAllByOrderByIdDesc(pageable);
 
-        return quotesPage.map(quote -> MapQuote.toResponseDto(quote));
+        return quotesPage.map(quote -> MapperQuote.toResponseDto(quote));
     }
 
     public Optional<Quote> getQuoteById(Integer id) {

@@ -1,6 +1,6 @@
-package com.gnose.api.dto.user;
+package com.gnose.api.dto.user.request;
 
-public class LoginRequest {
+public class LoginRequestDTO {
     private String login;
     private String password;
 

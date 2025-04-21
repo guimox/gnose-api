@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class GnoseApplication {
 
-	@GetMapping
-	public String applicationStatus() {
-		return "Application is up and running, everything's okay";
-	}
+    @GetMapping
+    public String applicationStatus() {
+        return "Application is up and running, everything's okay";
+    }
 
-	public static void main(String[] args) {
-		SpringApplication.run(GnoseApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(GnoseApplication.class, args);
+    }
 
 }

@@ -1,9 +1,9 @@
 package com.gnose.api.web.user;
 
-import com.gnose.api.dto.user.AuthRequest;
-import com.gnose.api.dto.user.AuthResponse;
-import com.gnose.api.dto.user.PasswordResetRequest;
-import com.gnose.api.dto.user.RegisterRequest;
+import com.gnose.api.dto.user.request.AuthRequestDTO;
+import com.gnose.api.dto.user.response.AuthResponseDTO;
+import com.gnose.api.dto.user.request.PasswordResetRequestDTO;
+import com.gnose.api.dto.user.request.RegisterRequestDTO;
 import com.gnose.api.jwt.JwtTokenUtil;
 import com.gnose.api.model.User;
 import com.gnose.api.util.AuthUtils;
@@ -16,7 +16,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -41,8 +40,8 @@ public class UserService {
     }
 
     @Transactional
-    public void registerUser(RegisterRequest registerRequest) {
-        String userEmail = registerRequest.getEmail();
+    public void registerUser(RegisterRequestDTO registerRequestDTO) {
+        String userEmail = registerRequestDTO.getEmail();
 
         if (!authUtils.isValidEmailFormat(userEmail)) {
             throw new IllegalArgumentException("Invalid email format");
@@ -52,8 +51,8 @@ public class UserService {
             throw new IllegalArgumentException("Email is already in use");
         }
 
-        String hashedPassword = authUtils.hashPassword(registerRequest.getPassword());
-        User newUser = new User(registerRequest.getName(), userEmail, hashedPassword);
+        String hashedPassword = authUtils.hashPassword(registerRequestDTO.getPassword());
+        User newUser = new User(registerRequestDTO.getName(), userEmail, hashedPassword);
         userRepository.save(newUser);
 
         String confirmationToken = jwtTokenUtil.generateConfirmationToken(userEmail);
@@ -98,7 +97,7 @@ public class UserService {
     }
 
     @Transactional
-    public void confirmPasswordReset(PasswordResetRequest request, String authHeaderToken) {
+    public void confirmPasswordReset(PasswordResetRequestDTO request, String authHeaderToken) {
         String email = jwtTokenUtil.getUserEmailFromToken(request.getEmail());
 
         if (!jwtTokenUtil.validatePasswordResetToken(authHeaderToken, email) ||
@@ -114,8 +113,8 @@ public class UserService {
     }
 
     @Transactional
-    public AuthResponse authenticateUser(AuthRequest authRequest) {
-        User user = userRepository.findByEmail(authRequest.getEmail())
+    public AuthResponseDTO authenticateUser(AuthRequestDTO authRequestDTO) {
+        User user = userRepository.findByEmail(authRequestDTO.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (!user.isEnabled()) {
@@ -124,7 +123,7 @@ public class UserService {
 
         try {
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword())
+                    new UsernamePasswordAuthenticationToken(authRequestDTO.getEmail(), authRequestDTO.getPassword())
             );
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -133,7 +132,7 @@ public class UserService {
             String jwt = jwtTokenUtil.generateToken(user.getEmail(), user.getAuthSalt());
             String refreshToken = jwtTokenUtil.generateRefreshToken(user.getEmail(), user.getAuthSalt());
 
-            return new AuthResponse(jwt, refreshToken, user.getEmail());
+            return new AuthResponseDTO(jwt, refreshToken, user.getEmail());
 
         } catch (BadCredentialsException e) {
             throw new RuntimeException("Invalid credentials.");
@@ -141,7 +140,7 @@ public class UserService {
     }
 
     @Transactional
-    public AuthResponse refreshToken(String refreshToken) {
+    public AuthResponseDTO refreshToken(String refreshToken) {
         String email = jwtTokenUtil.getUserEmailFromToken(refreshToken);
         String salt = jwtTokenUtil.getSaltFromToken(refreshToken);
 
@@ -155,6 +154,6 @@ public class UserService {
         String newAccessToken = jwtTokenUtil.generateToken(email, salt);
         String newRefreshToken = jwtTokenUtil.generateRefreshToken(email, salt);
 
-        return new AuthResponse(newAccessToken, newRefreshToken, email);
+        return new AuthResponseDTO(newAccessToken, newRefreshToken, email);
     }
 }

@@ -1,4 +1,4 @@
-package com.gnose.api.dto.quote;
+package com.gnose.api.dto.quote.response;
 
 import com.gnose.api.dto.category.CategoryDTO;
 import com.gnose.api.dto.language.LanguageDTO;
@@ -12,6 +12,15 @@ public class QuoteResponseDTO {
     private CategoryDTO category;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public QuoteResponseDTO(String quote, String category, String language) {
+        this.quote = quote;
+        this.category = new CategoryDTO(category);
+        this.language = new LanguageDTO(language);
+    }
+
+    public QuoteResponseDTO() {
+    }
 
     public String getQuote() {
         return quote;

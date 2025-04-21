@@ -1,13 +1,12 @@
 package com.gnose.api.web.quote;
 
-import com.gnose.api.dto.quote.QuoteRequest;
-import com.gnose.api.dto.quote.QuoteResponseDTO;
-import com.gnose.api.dto.quote.QuoteToCreate;
+import com.gnose.api.dto.quote.request.QuoteRequestDTO;
+import com.gnose.api.dto.quote.response.QuoteResponseDTO;
+import com.gnose.api.dto.quote.request.QuoteToCreateDTO;
 import com.gnose.api.model.Category;
 import com.gnose.api.model.Language;
 import com.gnose.api.model.Quote;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,10 +24,10 @@ public class QuoteController {
     }
 
     @PostMapping("/correct")
-    public ResponseEntity<?> correctAndStoreQuote(@RequestBody QuoteRequest quoteRequest) {
+    public ResponseEntity<?> correctAndStoreQuote(@RequestBody QuoteRequestDTO quoteRequestDTO) {
         try {
-            QuoteToCreate quoteToCreate = quoteService.correctAndStoreQuote(quoteRequest.getQuote());
-            return ResponseEntity.ok(quoteToCreate);
+            QuoteToCreateDTO quoteToCreateDTO = quoteService.correctAndStoreQuote(quoteRequestDTO.getQuote());
+            return ResponseEntity.ok(quoteToCreateDTO);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

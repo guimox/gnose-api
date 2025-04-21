@@ -1,6 +1,6 @@
-package com.gnose.api.dto.user;
+package com.gnose.api.dto.user.request;
 
-public class RegisterRequest {
+public class RegisterRequestDTO {
     private String email;
     private String name;
     private String password;

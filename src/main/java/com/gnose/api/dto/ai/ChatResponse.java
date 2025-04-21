@@ -9,7 +9,7 @@ public class ChatResponse {
     public static class Choice {
 
         private int index;
-        private Message message;
+        private ChatMessageDTO chatMessageDTO;
 
         public int getIndex() {
             return index;
@@ -19,12 +19,12 @@ public class ChatResponse {
             this.index = index;
         }
 
-        public Message getMessage() {
-            return message;
+        public ChatMessageDTO getMessage() {
+            return chatMessageDTO;
         }
 
-        public void setMessage(Message message) {
-            this.message = message;
+        public void setMessage(ChatMessageDTO chatMessageDTO) {
+            this.chatMessageDTO = chatMessageDTO;
         }
     }
 

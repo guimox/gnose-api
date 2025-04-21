@@ -11,6 +11,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Repository
 public interface QuoteRepository extends JpaRepository<Quote, Integer> {
 
@@ -34,4 +36,8 @@ public interface QuoteRepository extends JpaRepository<Quote, Integer> {
 
     @Query("SELECT q.votes FROM Quote q WHERE q.id = :quoteId")
     int findVotesByQuoteId(int quoteId);
+
+    Optional<Quote> findByQuoteAndLanguageAndCategory(String quote, Language language, Category category);
+
+    Optional<Quote> findByQuote(String quote);
 }

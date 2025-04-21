@@ -1,21 +1,18 @@
 package com.gnose.api.ai;
 
-import com.gnose.api.dto.ai.ChatRequest;
+import com.gnose.api.dto.ai.ChatRequestDTO;
 import com.gnose.api.dto.ai.ChatResponse;
-import com.gnose.api.dto.quote.QuoteResponse;
+import com.gnose.api.dto.quote.response.QuoteResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.http.HttpHeaders;
 import org.json.JSONObject;
 
 @Service
-public class OpenAiCorrectionService {
-
-    private final String OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
+public class CorrectionService {
 
     @Autowired
     @Qualifier("openaiRestTemplate")
@@ -27,11 +24,7 @@ public class OpenAiCorrectionService {
     @Value("${spring.ai.openai.chat.options.model}")
     private String model;
 
-    public QuoteResponse correctAndDetectValidQuote(String phraseToCheck) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + apiKey);
-        headers.set("Content-Type", "application/json");
-
+    public QuoteResponseDTO correctAndDetectValidQuote(String phraseToCheck) {
         JSONObject requestBody = new JSONObject();
         requestBody.put("model", model);
         requestBody.put("prompt", "Correct the following text: " + phraseToCheck);
@@ -39,7 +32,7 @@ public class OpenAiCorrectionService {
         requestBody.put("temperature", 0.5);
 
         try {
-            ChatRequest request = new ChatRequest(
+            ChatRequestDTO request = new ChatRequestDTO(
                     model,
                     "You are an expert in identifying and categorizing meaningful and impactful quotes. " +
                             "Correct any spelling, grammar, or word usage mistakes in the input. Always remove ? or " +
@@ -50,6 +43,7 @@ public class OpenAiCorrectionService {
                             "provide both the corrected quote, language used, and the category label. Correct this: " + phraseToCheck
             );
 
+            String OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
             ChatResponse response = restTemplate.postForObject(OPENAI_API_URL, request, ChatResponse.class);
             assert response != null;
 
@@ -63,11 +57,11 @@ public class OpenAiCorrectionService {
         } catch (HttpClientErrorException e) {
             System.out.println("Error: " + e.getMessage());
             System.out.println("Request Body: " + requestBody.toString());
-            return new QuoteResponse("An error occurred: " + e.getMessage(), "Error", "Unknown");
         }
+        return null;
     }
 
-    private QuoteResponse parseQuoteResponse(String responseText) {
+    private QuoteResponseDTO parseQuoteResponse(String responseText) {
         String correctedQuote = null;
         String categoryLabel = null;
         String language = null;
@@ -83,6 +77,6 @@ public class OpenAiCorrectionService {
             }
         }
 
-        return new QuoteResponse(correctedQuote, categoryLabel, language);
+        return new QuoteResponseDTO(correctedQuote, categoryLabel, language);
     }
 }

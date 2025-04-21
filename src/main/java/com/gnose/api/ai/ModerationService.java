@@ -8,11 +8,11 @@ import org.springframework.stereotype.Service;
 import java.util.regex.Pattern;
 
 @Service
-public class OpenAiModerationService {
+public class ModerationService {
 
   private final OpenAiModerationModel openAiModerationModel;
 
-  public OpenAiModerationService(OpenAiModerationModel moderationModel) {
+  public ModerationService(OpenAiModerationModel moderationModel) {
     this.openAiModerationModel = moderationModel;
   }
 

@@ -1,11 +1,11 @@
-package com.gnose.api.dto.user;
+package com.gnose.api.dto.user.response;
 
-public class AuthResponse {
+public class AuthResponseDTO {
     private final String accessToken;
     private final String refreshToken;
     private final String email;
 
-    public AuthResponse(String accessToken, String refreshToken, String email) {
+    public AuthResponseDTO(String accessToken, String refreshToken, String email) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.email = email;

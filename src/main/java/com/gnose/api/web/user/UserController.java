@@ -1,9 +1,9 @@
 package com.gnose.api.web.user;
 
-import com.gnose.api.dto.user.AuthRequest;
-import com.gnose.api.dto.user.AuthResponse;
-import com.gnose.api.dto.user.PasswordResetRequest;
-import com.gnose.api.dto.user.RegisterRequest;
+import com.gnose.api.dto.user.request.AuthRequestDTO;
+import com.gnose.api.dto.user.response.AuthResponseDTO;
+import com.gnose.api.dto.user.request.PasswordResetRequestDTO;
+import com.gnose.api.dto.user.request.RegisterRequestDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,9 +20,9 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<String> registerUser(@RequestBody RegisterRequestDTO registerRequestDTO) {
         try {
-            userService.registerUser(registerRequest);
+            userService.registerUser(registerRequestDTO);
             return ResponseEntity.ok("User registration initiated. Please check your email to confirm.");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -55,7 +55,7 @@ public class UserController {
     }
 
     @PostMapping("/reset-password/confirm")
-    public ResponseEntity<String> confirmPasswordReset(@RequestBody PasswordResetRequest request,
+    public ResponseEntity<String> confirmPasswordReset(@RequestBody PasswordResetRequestDTO request,
                                                        @RequestHeader("Authorization") String authHeaderToken) {
         try {
             userService.confirmPasswordReset(request, authHeaderToken);
@@ -66,20 +66,20 @@ public class UserController {
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<?> authenticateUser(@RequestBody AuthRequest authRequest) {
+    public ResponseEntity<?> authenticateUser(@RequestBody AuthRequestDTO authRequestDTO) {
         try {
-            AuthResponse authResponse = userService.authenticateUser(authRequest);
-            return ResponseEntity.ok(authResponse);
+            AuthResponseDTO authResponseDTO = userService.authenticateUser(authRequestDTO);
+            return ResponseEntity.ok(authResponseDTO);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @PostMapping("/refresh-token")
-    public ResponseEntity<AuthResponse> refreshToken(@RequestParam String refreshToken) {
+    public ResponseEntity<AuthResponseDTO> refreshToken(@RequestParam String refreshToken) {
         try {
-            AuthResponse authResponse = userService.refreshToken(refreshToken);
-            return ResponseEntity.ok(authResponse);
+            AuthResponseDTO authResponseDTO = userService.refreshToken(refreshToken);
+            return ResponseEntity.ok(authResponseDTO);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(null);
         }

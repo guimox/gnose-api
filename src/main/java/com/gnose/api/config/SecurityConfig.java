@@ -57,7 +57,7 @@ public class SecurityConfig {
                         .requestMatchers("/users/register", "/users/authenticate").permitAll()
                         .requestMatchers(HttpMethod.GET, "/quotes").permitAll()
                         .requestMatchers(HttpMethod.POST, "/quotes").authenticated()
-                        .requestMatchers("/quotes/**").hasRole("USER")
+                        .requestMatchers("/quotes/**").authenticated()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )
