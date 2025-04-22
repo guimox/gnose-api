@@ -1,7 +1,7 @@
 package com.gnose.api.ai;
 
 import com.gnose.api.dto.ai.ChatRequestDTO;
-import com.gnose.api.dto.ai.ChatResponse;
+import com.gnose.api.dto.ai.ChatResponseDTO;
 import com.gnose.api.dto.quote.response.QuoteResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -44,7 +44,7 @@ public class CorrectionService {
             );
 
             String OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
-            ChatResponse response = restTemplate.postForObject(OPENAI_API_URL, request, ChatResponse.class);
+            ChatResponseDTO response = restTemplate.postForObject(OPENAI_API_URL, request, ChatResponseDTO.class);
             assert response != null;
 
             String correctedText = response.getChoices().get(0).getMessage().getContent();

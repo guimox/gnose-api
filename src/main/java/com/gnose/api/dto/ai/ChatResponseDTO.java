@@ -2,7 +2,7 @@ package com.gnose.api.dto.ai;
 
 import java.util.List;
 
-public class ChatResponse {
+public class ChatResponseDTO {
 
     private List<Choice> choices;
 

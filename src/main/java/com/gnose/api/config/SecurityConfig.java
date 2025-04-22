@@ -56,6 +56,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/users/register", "/users/authenticate").permitAll()
                         .requestMatchers(HttpMethod.GET, "/quotes").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/quotes/random").permitAll()
                         .requestMatchers(HttpMethod.POST, "/quotes").authenticated()
                         .requestMatchers("/quotes/**").authenticated()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
